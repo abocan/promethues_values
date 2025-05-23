@@ -313,6 +313,27 @@ defaultRules:
 #        rules:
 #        - record: my_record
 #          expr: 100 * my_record
+additionalPrometheusRules:
+  - name: website-monitoring
+    rules:
+      - alert: WebsiteDown
+        expr: probe_success == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Website down: {{ $labels.instance }}"
+          description: "Target {{ $labels.instance }} is down for more than 2 minutes."
+
+      - alert: WebsiteSlow
+        expr: probe_duration_seconds > 3
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Website slow: {{ $labels.instance }}"
+          description: "Target {{ $labels.instance }} response time > 3s."
+
 
 ## Provide custom recording or alerting rules to be deployed into the cluster.
 ##
@@ -543,7 +564,12 @@ alertmanager:
         matchers:
           - alertname = "Watchdog"
     receivers:
-    - name: 'null'
+      - name: 'slack-notify'
+        slack_configs:
+          - channel: '#alerts'
+            send_resolved: true
+            username: 'Prometheus'
+            api_url: 'https://test.demo.local/services/webhook'
     templates:
     - '/etc/alertmanager/config/*.tmpl'
 
@@ -4344,7 +4370,23 @@ prometheus:
     ## The scrape configuration example below will find master nodes, provided they have the name .*mst.*, relabel the
     ## port to 2379 and allow etcd scraping provided it is running on all Kubernetes master nodes
     ##
-    additionalScrapeConfigs: []
+    additionalScrapeConfigs: 
+      - job_name: 'blackbox-http'
+        metrics_path: /probe
+        params:
+          module: [http_2xx]  # 使用預設模組
+        static_configs:
+          - targets:
+              - https://grafana.iscom.local
+              - https://prometheus.iscom.local
+              - https://test.demo.local
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter.monitoring.svc.cluster.local:9115
     # - job_name: kube-etcd
     #   kubernetes_sd_configs:
     #     - role: node
@@ -4541,7 +4583,7 @@ prometheus:
     ## Disabled by default
     enforcedNamespaceLabel: ""
 
-    ## PrometheusRulesExcludedFromEnforce - list of prometheus rules to be excluded from enforcing of adding namespace labels.
+    ## PrometheusExcludedFromEnforce - list of prometheus  to be excluded from enforcing of adding namespace labels.
     ## Works only if enforcedNamespaceLabel set to true. Make sure both ruleNamespace and ruleName are set for each pair
     ## Deprecated, use `excludedFromEnforcement` instead
     prometheusRulesExcludedFromEnforce: []
