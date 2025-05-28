@@ -4372,7 +4372,7 @@ prometheus:
     ##
     additionalScrapeConfigs: 
       - job_name: 'blackbox-http'
-        metrics_path: /probe
+        metrics_path: /metrics
         params:
           module: [http_2xx]  # 使用預設模組
         static_configs:
