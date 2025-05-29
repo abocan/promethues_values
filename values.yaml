@@ -508,6 +508,12 @@ alertmanager:
   ##
   config:
     global:
+      smtp_from: iscom.smdt2@gmail.com
+      smtp_smarthost: smtp.gmail.com:587
+      smtp_auth_username: iscom.smdt2@gmail.com
+      smtp_auth_password: ocdm jicx qqxc urdv
+      smtp_auth_method: PLAIN
+      smtp_require_tls: true
       resolve_timeout: 5m
     inhibit_rules:
       - source_matchers:
@@ -543,7 +549,10 @@ alertmanager:
         matchers:
           - alertname = "Watchdog"
     receivers:
-    - name: 'null'
+    - name: 'email-jim' # 給這個接收器一個名稱
+      email_configs:
+        - to: jimsie@iscom.com.tw # 接收郵件的地址
+          send_resolved: true # 在警報解決時也發送通知
     templates:
     - '/etc/alertmanager/config/*.tmpl'
 
