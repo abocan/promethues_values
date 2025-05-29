@@ -4118,7 +4118,9 @@ prometheus:
     ## ServiceMonitors to be selected for target discovery.
     ## If {}, select all ServiceMonitors
     ##
-    serviceMonitorSelector: {}
+    serviceMonitorSelector: 
+      matchLabels:
+        release: kube-prometheus-stack
     ## Example which selects ServiceMonitors with label "prometheus" set to "somelabel"
     # serviceMonitorSelector:
     #   matchLabels:
@@ -4126,9 +4128,7 @@ prometheus:
 
     ## Namespaces to be selected for ServiceMonitor discovery.
     ##
-    serviceMonitorNamespaceSelector: 
-      matchNames:
-        - testweb
+    serviceMonitorNamespaceSelector: {}
     ## Example which selects ServiceMonitors in namespaces with label "prometheus" set to "somelabel"
     # serviceMonitorNamespaceSelector:
     #   matchLabels:
