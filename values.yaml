@@ -623,7 +623,7 @@ alertmanager:
     hosts: []
       # - alertmanager.domain.com
 
-    ## Paths to use for ingress rules - one path should match the alertmanagerSpec.routePrefix
+    ## Paths to use for ingress rules - one path should match the .routePrefix
     ##
     paths: []
     # - /
@@ -900,7 +900,7 @@ alertmanager:
     # - port: oauth-metrics
     #   path: /metrics
 
-  ## Settings affecting alertmanagerSpec
+  ## Settings affecting 
   ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#alertmanagerspec
   ##
   alertmanagerSpec:
@@ -1356,6 +1356,10 @@ grafana:
   #   size: 20Gi
   #   finalizers:
   #     - kubernetes.io/pvc-protection
+  persistence:
+    enabled: true
+    storageClassName: nfs-client
+    size: 5Gi
 
   serviceAccount:
     create: true
@@ -4320,7 +4324,14 @@ prometheus:
     ## Prometheus StorageSpec for persistent data
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/platform/storage.md
     ##
-    storageSpec: {}
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: nfs-client
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
     ## Using PersistentVolumeClaim
     ##
     #  volumeClaimTemplate:
@@ -5138,7 +5149,14 @@ thanosRuler:
     ## Storage is the definition of how storage will be used by the ThanosRuler instances.
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/platform/storage.md
     ##
-    storage: {}
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: nfs-client
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
     # volumeClaimTemplate:
     #   spec:
     #     storageClassName: gluster
