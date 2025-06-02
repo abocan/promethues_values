@@ -508,6 +508,12 @@ alertmanager:
   ##
   config:
     global:
+      smtp_from: iscom.smdt2@gmail.com
+      smtp_smarthost: smtp.gmail.com:587
+      smtp_auth_username: 
+      smtp_auth_password: 
+      smtp_auth_method: PLAIN
+      smtp_require_tls: true
       resolve_timeout: 5m
     inhibit_rules:
       - source_matchers:
@@ -537,13 +543,16 @@ alertmanager:
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 12h
-      receiver: 'null'
+      receiver: 'email-jim'
       routes:
       - receiver: 'null'
         matchers:
           - alertname = "Watchdog"
     receivers:
-    - name: 'null'
+    - name: 'email-jim' # 給這個接收器一個名稱
+      email_configs:
+        - to: jimsie@iscom.com.tw # 接收郵件的地址
+          send_resolved: true # 在警報解決時也發送通知
     templates:
     - '/etc/alertmanager/config/*.tmpl'
 
@@ -1005,7 +1014,7 @@ alertmanager:
 
     ## Log level for Alertmanager to be configured with.
     ##
-    logLevel: info
+    logLevel: debug
 
     ## Size is the expected size of the alertmanager cluster. The controller will eventually make the size of the
     ## running cluster equal to the expected size.
@@ -4118,7 +4127,9 @@ prometheus:
     ## ServiceMonitors to be selected for target discovery.
     ## If {}, select all ServiceMonitors
     ##
-    serviceMonitorSelector: {}
+    serviceMonitorSelector: 
+      matchLabels:
+        release: kube-prometheus-stack
     ## Example which selects ServiceMonitors with label "prometheus" set to "somelabel"
     # serviceMonitorSelector:
     #   matchLabels:
